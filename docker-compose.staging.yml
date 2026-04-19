@@ -1,0 +1,41 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# AUJASYA — Staging Docker Compose Overrides
+# Usage: docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+# ══════════════════════════════════════════════════════════════════════════════
+
+services:
+  api:
+    build:
+      target: production
+    restart: always
+    volumes: []
+    command: gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 120
+
+  celery-worker:
+    build:
+      target: production
+    restart: always
+    volumes: []
+    command: celery -A app.tasks.celery_app worker --loglevel=warning --concurrency=4
+
+  celery-beat:
+    build:
+      target: production
+    restart: always
+    volumes: []
+    command: celery -A app.tasks.celery_app beat --loglevel=warning
+
+  web:
+    build:
+      target: production
+    restart: always
+    volumes: []
+    command: node server.js
+
+  nginx:
+    profiles: []
+    volumes:
+      - ./nginx/nginx.staging.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"

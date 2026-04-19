@@ -1,0 +1,166 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# AUJASYA — CI Pipeline
+# Runs on every Pull Request: lint, type-check, test
+# ══════════════════════════════════════════════════════════════════════════════
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Frontend Checks ──────────────────────────────────────────────────────
+  frontend-checks:
+    name: Frontend (Lint, Type Check, Test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm tsc --noEmit
+
+      - name: Lint
+        run: pnpm eslint . --max-warnings 0
+
+      - name: Unit tests
+        run: pnpm vitest run --coverage --coverage.thresholds.lines=70
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: apps/web/coverage/
+
+  # ── Backend Checks ──────────────────────────────────────────────────────
+  backend-checks:
+    name: Backend (Lint, Type Check, Test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: aujasya
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: aujasya_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U aujasya"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint (Ruff)
+        run: ruff check app/
+
+      - name: Type check (mypy)
+        run: mypy app/ --strict --ignore-missing-imports
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql+asyncpg://aujasya:password@localhost:5432/aujasya_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test_secret_key_for_ci_only_not_production_abcdef1234567890
+          ENCRYPTION_MASTER_KEY: test_encryption_key_for_ci_only_not_production_abcdef12
+          ENCRYPTION_KEY_VERSION: v1
+          APP_ENV: testing
+        run: pytest tests/ --cov=app --cov-report=xml --cov-fail-under=75
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: apps/api/coverage.xml
+
+  # ── Security Scan ────────────────────────────────────────────────────────
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install frontend deps
+        run: pnpm install --frozen-lockfile
+        working-directory: apps/web
+
+      - name: NPM audit
+        run: pnpm audit --audit-level=high
+        working-directory: apps/web
+        continue-on-error: true
+
+      - name: Install backend deps
+        run: pip install -r requirements.txt safety bandit
+        working-directory: apps/api
+
+      - name: Safety check (Python deps)
+        run: safety check -r requirements.txt
+        working-directory: apps/api
+        continue-on-error: true
+
+      - name: Bandit security scan
+        run: bandit -r app/ -ll
+        working-directory: apps/api

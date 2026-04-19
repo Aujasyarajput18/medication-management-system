@@ -1,0 +1,70 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Build Output ──────────────────────────────────────────────────────────────
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+.eggs/
+*.whl
+.venv/
+venv/
+env/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ── Environment Variables ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.*.local
+# Keep example files
+!.env.example
+!.env.local.example
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+postgres_data/
+redis_data/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/coverage/
+
+# ── Sentry ────────────────────────────────────────────────────────────────────
+.sentryclirc
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
