@@ -36,9 +36,42 @@ coverage.xml
 .env.staging
 .env.production
 .env.*.local
-# Keep example files
+.env.*
+# keep env templates
 !.env.example
 !.env.local.example
+!*.env.example
+!*.env.local.example
+# Keep example files
+
+# ── Secrets / Keys / Certificates ─────────────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.der
+*.jks
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+**/*service*account*.json
+**/credentials*.json
+**/secrets*.json
+**/secret*.json
+
+# allow known public config manifest files
+!**/manifest.json
+
+# ── Local Databases / Backups / Dumps ────────────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+*.bak
+*.backup
+*.dump
+*.sql.gz
 
 # ── Docker ────────────────────────────────────────────────────────────────────
 postgres_data/
