@@ -1,4 +1,4 @@
-# Aujasya — औजस्य
+# MedSync
 
 > **Medication Adherence Platform for Indian Adults**
 > Phase 1 · Team 70
