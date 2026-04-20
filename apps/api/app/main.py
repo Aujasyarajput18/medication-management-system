@@ -134,9 +134,27 @@ from app.routers.doses import router as doses_router
 from app.routers.caregivers import router as caregivers_router
 from app.routers.notifications import router as notifications_router
 
+# Phase 2 Routers
+from app.routers.ocr import router as ocr_router
+from app.routers.pill_id import router as pill_id_router
+from app.routers.generics import router as generics_router
+from app.routers.voice import router as voice_router
+from app.routers.fasting import router as fasting_router
+from app.routers.interactions import router as interactions_router
+from app.routers.journal import router as journal_router
+
 app.include_router(health_router, prefix=API_PREFIX)
 app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(medicines_router, prefix=API_PREFIX)
 app.include_router(doses_router, prefix=API_PREFIX)
 app.include_router(caregivers_router, prefix=API_PREFIX)
 app.include_router(notifications_router, prefix=API_PREFIX)
+
+# Include Phase 2 Routers
+app.include_router(ocr_router, prefix=API_PREFIX)
+app.include_router(pill_id_router, prefix=API_PREFIX)
+app.include_router(generics_router, prefix=API_PREFIX)
+app.include_router(voice_router, prefix=API_PREFIX)
+app.include_router(fasting_router, prefix=API_PREFIX)
+app.include_router(interactions_router, prefix=API_PREFIX)
+app.include_router(journal_router, prefix=API_PREFIX)

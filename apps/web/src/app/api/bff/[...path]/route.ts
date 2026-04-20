@@ -30,6 +30,15 @@ const ALLOWED_ROUTE_PREFIXES = [
   'caregivers',
   'notifications',
   'health',
+  // Phase 2 Routes
+  'ocr',
+  'pill-id',
+  'generics',
+  'voice',
+  'fasting',
+  'interactions',
+  'journal',
+  'refills',
 ];
 
 function isAllowedRoute(pathSegments: string[]): boolean {
