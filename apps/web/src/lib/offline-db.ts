@@ -70,7 +70,7 @@ type AujasyaDB = {
   'sync-queue': {
     key: string;
     value: OfflineMutation;
-    indexes: { 'by-synced': boolean };
+    indexes: Record<string, never>;
   };
   'cached-doses': {
     key: string;
@@ -81,7 +81,7 @@ type AujasyaDB = {
   'journal-entries': {
     key: string;
     value: OfflineJournalEntry;
-    indexes: { 'by-synced': boolean; 'by-date': string };
+    indexes: { 'by-date': string };
   };
   'interaction-cache': {
     key: string;
@@ -106,8 +106,7 @@ export async function getDB(): Promise<IDBPDatabase<AujasyaDB>> {
       if (oldVersion < 1) {
         // Sync queue for offline mutations
         if (!db.objectStoreNames.contains('sync-queue')) {
-          const syncStore = db.createObjectStore('sync-queue', { keyPath: 'id' });
-          syncStore.createIndex('by-synced', 'synced');
+          db.createObjectStore('sync-queue', { keyPath: 'id' });
         }
 
         // Cached dose logs for offline viewing
@@ -122,7 +121,6 @@ export async function getDB(): Promise<IDBPDatabase<AujasyaDB>> {
         // Offline journal entries
         if (!db.objectStoreNames.contains('journal-entries')) {
           const journalStore = db.createObjectStore('journal-entries', { keyPath: 'id' });
-          journalStore.createIndex('by-synced', 'synced');
           journalStore.createIndex('by-date', 'onsetDate');
         }
 
@@ -161,7 +159,8 @@ export async function addToSyncQueue(mutation: Omit<OfflineMutation, 'id' | 'syn
 
 export async function getPendingSyncItems(): Promise<OfflineMutation[]> {
   const db = await getDB();
-  return db.getAllFromIndex('sync-queue', 'by-synced', false);
+  const items = await db.getAll('sync-queue');
+  return items.filter((item) => !item.synced);
 }
 
 export async function markSynced(id: string): Promise<void> {
@@ -175,7 +174,7 @@ export async function markSynced(id: string): Promise<void> {
 
 export async function clearSyncedItems(): Promise<void> {
   const db = await getDB();
-  const synced = await db.getAllFromIndex('sync-queue', 'by-synced', true);
+  const synced = (await db.getAll('sync-queue')).filter((item) => item.synced);
   const tx = db.transaction('sync-queue', 'readwrite');
   for (const item of synced) {
     await tx.store.delete(item.id);
@@ -230,7 +229,8 @@ export async function addOfflineJournalEntry(
 
 export async function getPendingJournalEntries(): Promise<OfflineJournalEntry[]> {
   const db = await getDB();
-  return db.getAllFromIndex('journal-entries', 'by-synced', false);
+  const items = await db.getAll('journal-entries');
+  return items.filter((item) => !item.synced);
 }
 
 export async function markJournalEntrySynced(id: string): Promise<void> {
