@@ -195,16 +195,6 @@ pnpm test:e2e      # Playwright E2E
 
 6. **days_of_week Convention** — 0 = Sunday (JavaScript `Date.getDay()` convention), validated by Pydantic.
 
-## 👥 Team 70
-
-| Name | Role |
-|------|------|
-| Aujasya Rajput | Lead Developer |
-| Adarsh Mishra | Backend |
-| Aryan Damara | Frontend |
-| Darsh Bansal | DevOps |
-| Abhinav Sharma | Testing |
-
 ## 📄 License
 
 MIT © 2025 Team 70
