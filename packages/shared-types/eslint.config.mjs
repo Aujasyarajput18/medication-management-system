@@ -1,1 +1,5 @@
-export default [];
+export default [
+  {
+    files: ['src/**/*.ts'],
+  },
+];

@@ -5,7 +5,7 @@
 
 import { format, formatDistanceToNow, isToday, isYesterday, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
-import { hi, enIN, ta, te, bn, mrIN } from 'date-fns/locale';
+import { hi, enIN, ta, te, bn } from 'date-fns/locale';
 
 const LOCALE_MAP: Record<string, Locale> = {
   hi: hi,
@@ -13,7 +13,7 @@ const LOCALE_MAP: Record<string, Locale> = {
   ta: ta,
   te: te,
   bn: bn,
-  mr: mrIN,
+  mr: hi,
 };
 
 export function formatDate(dateStr: string, locale: string = 'en'): string {

@@ -52,11 +52,14 @@ export async function recognizeImage(
   }
 
   const { data } = await workerInstance!.recognize(imageBlob);
+  const words = (
+    data as unknown as { words?: Array<{ text: string; confidence: number }> }
+  ).words ?? [];
 
   return {
     text: data.text.trim(),
     confidence: data.confidence / 100, // Normalize to 0-1
-    words: data.words.map((w) => ({
+    words: words.map((w) => ({
       text: w.text,
       confidence: w.confidence / 100,
     })),
