@@ -47,6 +47,40 @@ installSerwist({
         },
       },
     },
+
+    // ── Phase 2: ML Model Files (cache-first, 90 days) ────────────────────
+    // Pill ID MobileNetV2 weights (~20MB). Cache-first prevents re-downloads.
+    // Purged by storage-quota.ts when device storage is low.
+    {
+      urlPattern: /\/models\/.*\.(json|bin|wasm)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'aujasya-ml-models-v1',
+        expiration: {
+          maxEntries: 20,
+          maxAgeSeconds: 60 * 60 * 24 * 90, // 90 days
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
+
+    // Tesseract.js language data (cache-first, 30 days)
+    {
+      urlPattern: /tesseract.*\.(traineddata|wasm|gz)$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'aujasya-tesseract-v1',
+        expiration: {
+          maxEntries: 10,
+          maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+        },
+        cacheableResponse: {
+          statuses: [0, 200],
+        },
+      },
+    },
   ],
   // Offline fallback
   fallbacks: {

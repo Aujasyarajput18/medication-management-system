@@ -11,6 +11,7 @@ from datetime import date, datetime
 from sqlalchemy import (
     Boolean,
     Date,
+    DateTime,
     Index,
     LargeBinary,
     Numeric,
@@ -47,6 +48,17 @@ class Medicine(Base, UUIDPrimaryKeyMixin, TimestampMixin):
     imprint: Mapped[str | None] = mapped_column(String(50), nullable=True)
     total_quantity: Mapped[int | None] = mapped_column(nullable=True)
     remaining_quantity: Mapped[int | None] = mapped_column(nullable=True)
+
+    # Phase 2: RxNorm concept ID for drug interaction lookups
+    rxcui: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
+    # Phase 2: Refill tracking
+    refill_alert_sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True,
+    )
+    refill_threshold_days: Mapped[int] = mapped_column(
+        nullable=False, server_default="5",
+    )
 
     # AES-256-GCM encrypted fields
     prescribed_by: Mapped[bytes | None] = mapped_column(LargeBinary, nullable=True)
