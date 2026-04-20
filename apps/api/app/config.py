@@ -72,6 +72,58 @@ class Settings(BaseSettings):
     SENTRY_DSN: str = ""
     SENTRY_ENVIRONMENT: str = "development"
 
+    # ══════════════════════════════════════════════════════════════════════
+    # PHASE 2 — AI Intelligence & Clinical Decision Layer
+    # ══════════════════════════════════════════════════════════════════════
+
+    # ── Bhashini (Voice STT/TTS) ──────────────────────────────────────────
+    BHASHINI_API_KEY: str = ""
+    BHASHINI_USER_ID: str = ""
+    BHASHINI_API_URL: str = "https://dhruva-api.bhashini.gov.in"
+    BHASHINI_STT_SERVICE_ID: str = ""
+    BHASHINI_TTS_SERVICE_ID: str = ""
+    BHASHINI_NMT_SERVICE_ID: str = ""
+
+    # ── Ekacare (Medicine Database) ───────────────────────────────────────
+    EKACARE_API_URL: str = "https://api.ekacare.com"
+    EKACARE_API_KEY: str = ""
+    EKACARE_RATE_LIMIT_PER_MINUTE: int = 60
+
+    # ── PMBJP (Jan Aushadhi) ─────────────────────────────────────────────
+    PMBJP_API_URL: str = "https://janaushadhi.gov.in/api"
+    PMBJP_API_KEY: str = ""
+    PMBJP_LOCATOR_RADIUS_KM: int = 25
+
+    # ── Prayer Times APIs ─────────────────────────────────────────────────
+    ALADHAN_API_URL: str = "https://api.aladhan.com/v1"
+    SUNRISE_SUNSET_API_URL: str = "https://api.sunrise-sunset.org"
+
+    # ── Drug Interaction APIs ─────────────────────────────────────────────
+    RXNORM_API_URL: str = "https://rxnav.nlm.nih.gov/REST"
+    OPENFDA_API_URL: str = "https://api.fda.gov/drug"
+    OPENFDA_API_KEY: str = ""
+
+    # ── Exotel (IVR) ─────────────────────────────────────────────────────
+    EXOTEL_ACCOUNT_SID: str = ""
+    EXOTEL_API_KEY: str = ""
+    EXOTEL_API_TOKEN: str = ""
+    EXOTEL_CALLER_ID: str = ""
+
+    # ── AI Models ─────────────────────────────────────────────────────────
+    PILL_MODEL_VERSION: str = "v1"
+    PILL_MODEL_CONFIDENCE_THRESHOLD: float = 0.70
+    PILL_MODEL_MOCK: bool = True  # Returns synthetic results when True
+
+    # ── LLaVA Microservice ────────────────────────────────────────────────
+    LLAVA_SERVICE_URL: str = "http://llava-service:8001"
+    LLAVA_CONFIDENCE_THRESHOLD: float = 0.65
+    LLAVA_MAX_IMAGE_SIZE_MB: int = 10
+    LLAVA_MOCK: bool = True  # Returns fixture JSON when True
+
+    # ── Redis (Phase 2 cache additions) ───────────────────────────────────
+    REDIS_TTS_CACHE_DB: int = 5
+    REDIS_PRAYER_CACHE_DB: int = 6
+
     @property
     def cors_origins_list(self) -> list[str]:
         """Parse CORS_ORIGINS string into a list."""

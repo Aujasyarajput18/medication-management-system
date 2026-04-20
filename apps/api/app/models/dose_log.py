@@ -64,6 +64,11 @@ class DoseLog(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         DateTime(timezone=True), nullable=True,
     )
 
+    # Phase 2: Links to expanded side-effect journal (side_effect_entries)
+    has_journal_entry: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false",
+    )
+
     __table_args__ = (
         UniqueConstraint("schedule_id", "scheduled_date", "meal_anchor",
                          name="uq_dose_schedule_date_anchor"),

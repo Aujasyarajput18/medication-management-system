@@ -62,6 +62,27 @@ celery_app.conf.beat_schedule = {
         "schedule": crontab(hour=2, minute=0),  # 02:00 IST
         "options": {"queue": "maintenance"},
     },
+
+    # ── Phase 2 Beat Schedules ───────────────────────────────────────────
+
+    # Check for medicines needing refill — daily at 08:00 IST
+    "check-refills": {
+        "task": "app.tasks.refill_tasks.check_refills",
+        "schedule": crontab(hour=8, minute=0),
+        "options": {"queue": "maintenance"},
+    },
+    # Purge expired drug interaction cache entries — weekly Sunday 02:00 IST
+    "refresh-interaction-cache": {
+        "task": "app.tasks.interaction_cache_tasks.refresh_interaction_cache",
+        "schedule": crontab(hour=2, minute=0, day_of_week=0),
+        "options": {"queue": "maintenance"},
+    },
+    # Purge expired generic search cache — weekly Sunday 02:30 IST
+    "cleanup-generic-cache": {
+        "task": "app.tasks.interaction_cache_tasks.cleanup_generic_cache",
+        "schedule": crontab(hour=2, minute=30, day_of_week=0),
+        "options": {"queue": "maintenance"},
+    },
 }
 
 # Auto-discover tasks

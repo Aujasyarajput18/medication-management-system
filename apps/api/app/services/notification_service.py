@@ -196,6 +196,87 @@ class NotificationService:
 
         return success
 
+    # ── Phase 2: IVR via Exotel ──────────────────────────────────────────
+
+    async def send_ivr(
+        self,
+        phone: str,
+        patient_id: uuid.UUID,
+        dose_log_id: uuid.UUID | None = None,
+        tts_message: str = "Aapki dawai ka samay ho gaya hai. Kripya apni dawai lein.",
+        level: int = 4,
+    ) -> bool:
+        """
+        Send IVR call via Exotel (Level 4 escalation).
+        Circuit breaker: If Exotel is down, skip IVR and escalate via WhatsApp.
+        TTS message is in Hindi by default (Aujasya's primary user base).
+        """
+        success = False
+
+        if settings.EXOTEL_ACCOUNT_SID and settings.EXOTEL_API_KEY:
+            try:
+                import httpx
+
+                exotel_url = (
+                    f"https://api.exotel.com/v1/Accounts/{settings.EXOTEL_ACCOUNT_SID}"
+                    f"/Calls/connect.json"
+                )
+
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    response = await client.post(
+                        exotel_url,
+                        auth=(settings.EXOTEL_API_KEY, settings.EXOTEL_API_TOKEN),
+                        data={
+                            "From": phone,
+                            "CallerId": settings.EXOTEL_CALLER_ID,
+                            "Url": f"http://my.exotel.com/exoml/start_voice/{settings.EXOTEL_ACCOUNT_SID}",
+                            "CustomField": tts_message,
+                            "StatusCallback": "",  # TODO: Add callback URL for call status tracking
+                        },
+                    )
+                    success = response.status_code in (200, 201)
+
+                    if not success:
+                        logger.error(
+                            "exotel_ivr_failed",
+                            status=response.status_code,
+                            phone_last4=phone[-4:],
+                        )
+
+            except Exception as e:
+                logger.error("ivr_send_failed", error=str(e))
+                # Fallback: escalate via WhatsApp when IVR is unavailable
+                logger.info("ivr_fallback_to_whatsapp", phone_last4=phone[-4:])
+                return await self.send_whatsapp(
+                    phone=phone,
+                    template_name="missed_dose_urgent",
+                    params=[tts_message],
+                    patient_id=patient_id,
+                    dose_log_id=dose_log_id,
+                    level=level,
+                )
+        else:
+            logger.warning("exotel_not_configured")
+            # Fallback to WhatsApp if Exotel not configured
+            return await self.send_whatsapp(
+                phone=phone,
+                template_name="missed_dose_urgent",
+                params=[tts_message],
+                patient_id=patient_id,
+                dose_log_id=dose_log_id,
+                level=level,
+            )
+
+        await self._log_notification(
+            patient_id=patient_id,
+            dose_log_id=dose_log_id,
+            channel="ivr",
+            level=level,
+            status="sent" if success else "failed",
+        )
+
+        return success
+
     async def _log_notification(
         self,
         patient_id: uuid.UUID,
