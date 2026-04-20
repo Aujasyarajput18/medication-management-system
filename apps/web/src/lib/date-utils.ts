@@ -13,7 +13,7 @@ const LOCALE_MAP: Record<string, Locale> = {
   ta: ta,
   te: te,
   bn: bn,
-  mr: hi,
+  mr: enIN,
 };
 
 export function formatDate(dateStr: string, locale: string = 'en'): string {
